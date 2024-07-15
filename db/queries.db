@@ -1,0 +1,36 @@
+
+
+
+
+ALTER PROCEDURE getOrderDetailsInfo(@orderId  int) as 
+BEGIN 
+	SELECT p.ProductName as name	 ,p.UnitPrice as unitPrice, od.quantity, pt.popularity as popularity
+	FROM  Orders o
+	LEFT JOIN [Order Details] od ON od.OrderID= o.OrderID 
+	LEFT JOIN Products p ON od.ProductID= p.ProductID
+	LEFT JOIN (
+		SELECT COUNT(*) as popularity  , ProductID 
+		FROM [Order Details] odp 
+		GROUP BY odp.ProductID) pt on  pt.ProductID=p.ProductID 
+	WHERE o.OrderID = @orderId
+END;
+
+CREATE PROCEDURE getOrderCustomerInfo(@orderId  int) as 
+BEGIN 
+	SELECT c.CompanyName as name, c.Address as address
+	FROM  Orders o
+	LEFT JOIN Customers c ON o.CustomerID = c.CustomerID 
+	WHERE o.OrderID = @orderId
+	
+END;
+
+ALTER PROCEDURE getOrderInfo(@orderId  int) as 
+BEGIN 
+	EXEC getOrderCustomerInfo @orderId = @orderId
+	EXEC getOrderDetailsInfo @orderId = @orderId	
+END;
+
+EXEC getOrderInfo @orderId = 10253;
+
+
+
